@@ -20,6 +20,7 @@ extension Resolver: ResolverRegistering {
     // register application components
     register { AuthenticationService() }.scope(application)
     register { FirestoreMessagesRepository() as MessagesRepository }.scope(application)
+    register { FirestoreRoomsRepository() as RoomsRepository }.scope(application)
   }
 }
 
