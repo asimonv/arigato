@@ -6,11 +6,14 @@ target 'ChatApp' do
   use_frameworks!
 
   # Pods for ChatApp
-
-  # add the Firebase pod for Google Analytics
   pod 'Firebase/Analytics'
-  # add pods for any other desired Firebase products
-  # https://firebase.google.com/docs/ios/setup#available-pods
+  pod 'Firebase/Firestore'
+  pod 'Firebase/Auth'
+  pod 'FirebaseFirestoreSwift'
+  pod 'Firebase/Functions'
+  
+  pod 'Resolver'
+  pod 'Disk', '~> 0.6.4'
 
   target 'ChatAppTests' do
     inherit! :search_paths
