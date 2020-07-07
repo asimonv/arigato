@@ -80,7 +80,6 @@ class FirestoreRoomsRepository: BaseRoomsRepository, RoomsRepository, Observable
     @Injected var authenticationService: AuthenticationService
     @LazyInjected var functions: Functions
 
-    var messagesPath: String = "messages"
     var roomsPath: String = "rooms"
     var userId: String = "unknown"
   
@@ -111,8 +110,7 @@ class FirestoreRoomsRepository: BaseRoomsRepository, RoomsRepository, Observable
       listenerRegistration?.remove()
     }
     listenerRegistration = db.collection(roomsPath)
-      .whereField("userId", isEqualTo: self.userId)
-      .order(by: "createdTime")
+      .order(by: "createdTime", descending: true)
       .addSnapshotListener { (querySnapshot, error) in
         if let querySnapshot = querySnapshot {
           self.rooms = querySnapshot.documents.compactMap { document -> Room? in

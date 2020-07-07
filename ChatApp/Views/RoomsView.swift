@@ -37,8 +37,8 @@ struct RoomsView: View {
     var status: String    { return("\(String(describing: lm.status))") }
 
     var body: some View {
-        List {
-            Text("Hello :-)")
+        List(roomsViewModel.roomCellViewModels) { roomCellVM in
+            RoomCell(roomCellVM: roomCellVM)
         }.navigationBarItems(trailing:
          Button(action: {
             self.isModal = true
