@@ -18,108 +18,43 @@ import Combine
 import Resolver
 
 class BaseMessagesRepository {
-  @Published var messages = [Message]()
+    @Published var messages = [Message]()
 }
 
 protocol MessagesRepository: BaseMessagesRepository {
-  func addMessage(_ message: Message)
-  func removeMessage(_ message: Message)
-  func updateMessage(_ message: Message)
-}
-
-
-class LocalMessagesRepository: BaseMessagesRepository, MessagesRepository, ObservableObject {
-  override init() {
-    super.init()
-    loadData()
-  }
-  
-  func addMessage(_ message: Message) {
-    self.messages.append(message)
-    saveData()
-  }
-  
-  func removeMessage(_ message: Message) {
-    if let index = messages.firstIndex(where: { $0.id == message.id }) {
-        self.messages.remove(at: index)
-      saveData()
-    }
-  }
-  
-  func updateMessage(_ message: Message) {
-    if let index = self.messages.firstIndex(where: { $0.id == message.id } ) {
-      self.messages[index] = message
-      saveData()
-    }
-  }
-  
-  private func loadData() {
-    if let retrievedMessages = try? Disk.retrieve("messages.json", from: .documents, as: [Message].self) {
-      self.messages = retrievedMessages
-    }
-  }
-  
-  private func saveData() {
-    do {
-      try Disk.save(self.messages, to: .documents, as: "messages.json")
-    }
-    catch let error as NSError {
-      fatalError("""
-        Domain: \(error.domain)
-        Code: \(error.code)
-        Description: \(error.localizedDescription)
-        Failure Reason: \(error.localizedFailureReason ?? "")
-        Suggestions: \(error.localizedRecoverySuggestion ?? "")
-        """)
-    }
-  }
+    func loadData(_ roomId: String)
+    func addMessage(_ message: Message)
+    func removeMessage(_ message: Message)
+    func updateMessage(_ message: Message)
 }
 
 class FirestoreMessagesRepository: BaseMessagesRepository, MessagesRepository, ObservableObject {
-  @Injected var db: Firestore
-  @Injected var authenticationService: AuthenticationService
-  @LazyInjected var functions: Functions
+    @Injected var db: Firestore
+    @Injected var authenticationService: AuthenticationService
+    @LazyInjected var functions: Functions
 
-  var messagesPath: String = "messages"
-  var userId: String = "unknown"
-  
-  private var listenerRegistration: ListenerRegistration?
-  private var cancellables = Set<AnyCancellable>()
-  
-  override init() {
-    super.init()
+    var messagesPath: String = "messages"
+    var userId: String = "unknown"
     
-    authenticationService.$user
-      .compactMap { user in
-        user?.uid
-      }
-      .assign(to: \.userId, on: self)
-      .store(in: &cancellables)
-    
-    // (re)load data if user changes
-    authenticationService.$user
-      .receive(on: DispatchQueue.main)
-      .sink { [weak self] user in
-        self?.loadData()
-      }
-      .store(in: &cancellables)
-  }
   
-  private func loadData() {
-    if listenerRegistration != nil {
-      listenerRegistration?.remove()
-    }
-    listenerRegistration = db.collection(messagesPath)
-      .whereField("userId", isEqualTo: self.userId)
-      .order(by: "createdTime")
-      .addSnapshotListener { (querySnapshot, error) in
-        if let querySnapshot = querySnapshot {
-          self.messages = querySnapshot.documents.compactMap { document -> Message? in
-            try? document.data(as: Message.self)
-          }
+    private var listenerRegistration: ListenerRegistration?
+    private var cancellables = Set<AnyCancellable>()
+
+    func loadData(_ roomId: String) {
+        if listenerRegistration != nil {
+          listenerRegistration?.remove()
         }
-      }
-  }
+        listenerRegistration = db.collection(messagesPath)
+          .whereField("roomId", isEqualTo: roomId)
+          .order(by: "createdTime")
+          .addSnapshotListener { (querySnapshot, error) in
+            if let querySnapshot = querySnapshot {
+              self.messages = querySnapshot.documents.compactMap { document -> Message? in
+                try? document.data(as: Message.self)
+              }
+            }
+          }
+    }
   
   func addMessage(_ message: Message) {
     do {

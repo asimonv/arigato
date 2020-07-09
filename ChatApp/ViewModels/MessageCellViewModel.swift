@@ -18,10 +18,6 @@ class MessageCellViewModel: ObservableObject, Identifiable  {
   var id: String = ""
   private var cancellables = Set<AnyCancellable>()
   
-  static func newMessage() -> MessageCellViewModel {
-    MessageCellViewModel(message: Message(text: ""))
-  }
-  
   init(message: Message) {
     self.message = message
     

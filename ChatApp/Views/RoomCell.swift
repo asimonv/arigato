@@ -11,7 +11,7 @@ import SwiftUI
 struct RoomCell: View {
     @ObservedObject var roomCellVM: RoomCellViewModel
     var body: some View {
-        NavigationLink(destination: MessagesListView()) {
+        NavigationLink(destination: MessagesListView(roomId: roomCellVM.room.id!)) {
             HStack {
                 Text(roomCellVM.room.title).padding(10)
             }

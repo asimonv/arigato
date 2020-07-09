@@ -11,21 +11,25 @@ import Combine
 import Resolver
 
 class MessagesListViewModel: ObservableObject {
-  @Published var messageRepository: MessagesRepository = Resolver.resolve()
-  @Published var messageCellViewModels = [MessageCellViewModel]()
-  private var cancellables = Set<AnyCancellable>()
+    var messageRepository: MessagesRepository = Resolver.resolve()
+    @Published var messageCellViewModels = [MessageCellViewModel]()
+    private var cancellables = Set<AnyCancellable>()
   
-  init() {
-    messageRepository.$messages.map { messages in
-      messages.map { message in
-        MessageCellViewModel(message: message)
-      }
-    }
-    .assign(to: \.messageCellViewModels, on: self)
-    .store(in: &cancellables)
+    init(roomId: String) {
+        messageRepository.$messages.map { messages in
+          messages.map { message in
+            MessageCellViewModel(message: message)
+          }
+        }
+        .assign(to: \.messageCellViewModels, on: self)
+        .store(in: &cancellables)
   }
-  
-  func removeMessages(atOffsets indexSet: IndexSet) {
+    
+    func loadMessages(roomId: String) {
+        messageRepository.loadData(roomId)
+    }
+    
+func removeMessages(atOffsets indexSet: IndexSet) {
     // remove from repo
     let viewModels = indexSet.lazy.map { self.messageCellViewModels[$0] }
     viewModels.forEach { messageCellViewModel in

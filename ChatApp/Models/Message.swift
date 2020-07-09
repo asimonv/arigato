@@ -11,8 +11,9 @@ import FirebaseFirestore
 import FirebaseFirestoreSwift
 
 struct Message: Codable, Identifiable {
-  @DocumentID var id: String?
-  var text: String
-  @ServerTimestamp var createdTime: Timestamp?
-  var userId: String?
+    @DocumentID var id: String?
+    var text: String
+    @ServerTimestamp var createdTime: Timestamp?
+    var userId: String?
+    var roomId: String
 }

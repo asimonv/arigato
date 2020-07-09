@@ -9,8 +9,15 @@
 import SwiftUI
 
 struct MessagesListView: View {
-    @ObservedObject var messageListViewModel = MessagesListViewModel()
+    @ObservedObject var messageListViewModel: MessagesListViewModel
+    
     var name = ""
+    var roomId: String
+    
+    init(roomId: String) {
+        self.roomId = roomId
+        messageListViewModel = MessagesListViewModel(roomId: roomId)
+    }
     
     @State var write = ""
     var body: some View {
@@ -27,7 +34,7 @@ struct MessagesListView: View {
                 
                 Button(action: {
                     if self.write.count > 0 {
-                        self.messageListViewModel.addMessage(message: Message(text: self.write))
+                        self.messageListViewModel.addMessage(message: Message(text: self.write, roomId: self.roomId))
                         self.write = ""
                     } else {
                         
@@ -39,12 +46,11 @@ struct MessagesListView: View {
                     
                 }
             }.padding()
+        }.onAppear {
+            self.messageListViewModel.loadMessages(roomId: self.roomId)
+        }.onDisappear {
+            // repo will unsubscribe when called again
+            self.messageListViewModel.loadMessages(roomId: self.roomId)
         }
-    }
-}
-
-struct MessagesListView_Previews: PreviewProvider {
-    static var previews: some View {
-        MessagesListView()
     }
 }

@@ -110,14 +110,14 @@ class FirestoreRoomsRepository: BaseRoomsRepository, RoomsRepository, Observable
       listenerRegistration?.remove()
     }
     listenerRegistration = db.collection(roomsPath)
-      .order(by: "createdTime", descending: true)
-      .addSnapshotListener { (querySnapshot, error) in
-        if let querySnapshot = querySnapshot {
-          self.rooms = querySnapshot.documents.compactMap { document -> Room? in
-            try? document.data(as: Room.self)
-          }
+        .order(by: "createdTime", descending: true)
+        .addSnapshotListener { (querySnapshot, error) in
+            if let querySnapshot = querySnapshot {
+                self.rooms = querySnapshot.documents.compactMap { document -> Room? in
+                    try? document.data(as: Room.self)
+                }
+            }
         }
-      }
   }
   
   func addRoom(_ room: Room) {
